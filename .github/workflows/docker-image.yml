@@ -7,34 +7,56 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-push:
+  build-push-update-chart:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    # Optional: Add your own tests here (if you have any)
-    # - name: Run tests
-    #   run: npm test
+      # Optional: Add your own tests here (if you have any)
+      # - name: Run tests
+      #   run: npm test
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/cicd-example:latest
+      - name: Get short SHA
+        id: sha
+        run: echo "SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image (with unique tag)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cicd-example:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cicd-example:${{ steps.sha.outputs.SHA }}
+
+      - name: Update Helm values.yaml with new tag
+        run: |
+          sed -i "s/tag: .*/tag: ${{ steps.sha.outputs.SHA }}/" chart/values.yaml
+
+      - name: Commit and push updated Helm chart
+        run: |
+          git config --global user.email "ci-bot@yourdomain.com"
+          git config --global user.name "CI Bot"
+          git add chart/values.yaml
+          git commit -m "Update image tag to ${{ steps.sha.outputs.SHA }}"
+          git push
+        env:
+          # For permission to push, use a PAT (personal access token) if using a bot
+          # Or configure 'GITHUB_TOKEN' with proper permissions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
