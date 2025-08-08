@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cicd-example.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "cicd-example.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "cicd-example.name" . }}
+    spec:
+      containers:
+      - name: {{ include "cicd-example.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 3000
