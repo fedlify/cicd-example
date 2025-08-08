@@ -1,20 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "cicd-example.fullname" . }}
-  namespace:  {{ .Release.Namespace }}
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "cicd-example.name" . }}
+      app: {{ .Chart.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "cicd-example.name" . }}
+        app: {{ .Chart.Name }}
     spec:
       containers:
-      - name: {{ include "cicd-example.name" . }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        ports:
-        - containerPort: 3000
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
