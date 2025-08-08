@@ -10,4 +10,4 @@ FROM node:20-alpine
 WORKDIR /app
 COPY --from=builder /app /app
 EXPOSE 3000
-CMD ["node", "index.js"]
+CMD ["node", "src/index.js"]
