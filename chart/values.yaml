@@ -1,6 +1,6 @@
 image:
   repository: fedlify/cicd-example
-  tag: 2139fc9
+  tag: ec62cb0
   pullPolicy: IfNotPresent
 
 replicaCount: 1
