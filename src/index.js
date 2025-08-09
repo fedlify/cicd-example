@@ -5,7 +5,7 @@ const port = process.env.PORT || 3000;
 const apiKey = process.env.API_KEY;
 
 app.get('/', (req, res) => {
-  res.send(`Hello, world! API_KEY starts with-newv3: ${apiKey ? apiKey.slice(0,4) : 'N/A'}`);
+  res.send(`Hello, world! API_KEY starts with-newv4: ${apiKey ? apiKey.slice(0,4) : 'N/A'}`);
 });
 
 app.listen(port, () => {
